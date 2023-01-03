@@ -1,0 +1,20 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+img {
+    width: max-content;
+}
+
+canvas {
+    background: #f9f9f9;
+}
+
+#editor {
+    width: 600px;
+    height: 600px;
+}
