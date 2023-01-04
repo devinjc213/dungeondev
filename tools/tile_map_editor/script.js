@@ -180,7 +180,6 @@ window.onload = () => {
       const positionY = Object.keys(entry)[0].split('-')[1];
 
       ctx.strokeRect(positionX * 32, positionY * 32, 32, 32);
-      ctx.stroke();
     })
   }
 
