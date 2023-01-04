@@ -7,9 +7,11 @@ window.onload = () => {
   const layer0Btn = document.querySelector('#layer-0');
   const layer1Btn = document.querySelector('#layer-1');
   const layer2Btn = document.querySelector('#layer-2');
+  const collisionLayerBtn = document.querySelector('#collision-layer');
   const clearCanvasBtn = document.querySelector('#clear-canvas');
   const exportPNGBtn = document.querySelector('#export-png');
   const exportJSONBtn = document.querySelector('#export-json');
+  const exportCollisionBtn = document.querySelector('#export-collision-json');
 
   //export issue fix
   tilesetImage.crossOrigin = 'anonymous';
@@ -17,7 +19,9 @@ window.onload = () => {
   let isMouseDown = false;
   let selection = [0, 0];
   let currentLayer = 0;
+  let isCollisionLayer = false;
   let layers = [{}];
+  let collisionLayer = [];
 
   let cameraOffset = { x: window.innerWidth/2, y: window.innerHeight/2 }
   let cameraZoom = 1
@@ -37,10 +41,14 @@ window.onload = () => {
 
   function clearCanvas() {
     layers = [{}];
+    collisionLayer = [];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   function setLayer(newLayer) {
+    //turn off collision layer if it was on
+    isCollisionLayer = false;
+
     //Update the layer
     currentLayer = newLayer;
   }
@@ -99,9 +107,11 @@ window.onload = () => {
   layer0Btn.addEventListener('click', () => setLayer(0));
   layer1Btn.addEventListener('click', () => setLayer(1));
   layer2Btn.addEventListener('click', () => setLayer(2));
+  collisionLayerBtn.addEventListener('click', () => isCollisionLayer = true);
   clearCanvasBtn.addEventListener('click', () => clearCanvas());
   exportPNGBtn.addEventListener('click', () => exportPng());
   exportJSONBtn.addEventListener('click', () => exportJson('map.json', JSON.stringify(layers)));
+  exportCollisionBtn.addEventListener('click', () => exportJson('collision.json', JSON.stringify(collisionLayer)));
 
   //Select tile from the Tiles grid
   tilesetContainer.addEventListener("mousedown", (event) => {
@@ -117,11 +127,20 @@ window.onload = () => {
     let clicked = getCoords(event);
     let key = clicked[0] + "-" + clicked[1];
 
-    if (mouseEvent.shiftKey) {
-      delete layers[currentLayer][key];
+    if (isCollisionLayer) {
+      if (mouseEvent.shiftKey) {
+        collisionLayer = collisionLayer.filter(el => Object.keys(el)[0] !== key);
+      } else {
+        if (!collisionLayer.some(item => Object.keys(item)[0] === key)) collisionLayer.push({ [key]: 'solid' });
+        console.log(collisionLayer);
+      }
     } else {
-      if (!layers[currentLayer]) layers.push({ [key]: [selection[0], selection[1]] })
-      else layers[currentLayer][key] = [selection[0], selection[1]];
+      if (mouseEvent.shiftKey) {
+        delete layers[currentLayer][key];
+      } else {
+        if (!layers[currentLayer]) layers.push({ [key]: [selection[0], selection[1]] })
+        else layers[currentLayer][key] = [selection[0], selection[1]];
+      }
     }
     draw();
   }
@@ -155,6 +174,13 @@ window.onload = () => {
         );
       });
     });
+
+    collisionLayer.forEach(entry => {
+      const positionX = Object.keys(entry)[0].split('-')[0];
+      const positionY = Object.keys(entry)[0].split('-')[1];
+
+      ctx.strokeRect(positionX * 32, positionY * 32, 32, 32);
+    })
   }
 
   tilesetImage.onload = function () {
