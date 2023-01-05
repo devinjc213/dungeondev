@@ -47,14 +47,6 @@ class InputHandler {
   }
 }
 
-map1.collision.forEach((solid) => {
-  const coords = Object.keys(solid)[0];
-  const x = coords.split('-')[0] * 32;
-  const y = coords.split('-')[1] * 32;
-
-  console.log(x, y);
-})
-
 class Player {
   constructor() {
     this.gameWidth = CANVAS_WIDTH;
