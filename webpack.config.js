@@ -7,6 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, '/dist'),
     publicPath: '/',
   },
+  devtool: 'inline-source-map',
   module: {
     rules: [
       {
@@ -17,9 +18,17 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
     ],
   },
-  entry: './src/index.js',
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
+  entry: './src/index.ts',
   devServer: {
     static: {
       directory: path.join(__dirname, '/public'),
