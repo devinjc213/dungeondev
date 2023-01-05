@@ -12,6 +12,8 @@ window.onload = () => {
   const exportPNGBtn = document.querySelector('#export-png');
   const exportJSONBtn = document.querySelector('#export-json');
   const exportCollisionBtn = document.querySelector('#export-collision-json');
+  let form = document.querySelector('#upload');
+  let file = document.querySelector('#file');
 
   //export issue fix
   tilesetImage.crossOrigin = 'anonymous';
@@ -84,6 +86,13 @@ window.onload = () => {
     document.body.removeChild(element);
   }
 
+  function importJson(e) {
+    const res = e.target.result;
+    const json = JSON.parse(res);
+    layers = json.map;
+    collisionLayer = json.collision;
+    draw();
+  }
 
 
   //Event listeners
@@ -110,8 +119,17 @@ window.onload = () => {
   collisionLayerBtn.addEventListener('click', () => isCollisionLayer = true);
   clearCanvasBtn.addEventListener('click', () => clearCanvas());
   exportPNGBtn.addEventListener('click', () => exportPng());
-  exportJSONBtn.addEventListener('click', () => exportJson('map.json', JSON.stringify(layers)));
+  exportJSONBtn.addEventListener('click', () => exportJson('map.json', JSON.stringify({ map: layers, collision: collisionLayer })));
   exportCollisionBtn.addEventListener('click', () => exportJson('collision.json', JSON.stringify(collisionLayer)));
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!file.value.length) return;
+
+    let reader = new FileReader();
+    reader.onload = importJson;
+    reader.readAsText(file.files[0]);
+  });
 
   //Select tile from the Tiles grid
   tilesetContainer.addEventListener("mousedown", (event) => {
