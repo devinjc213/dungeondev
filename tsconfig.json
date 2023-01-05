@@ -7,7 +7,13 @@
     "allowJs": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "typeRoots": ["src/types"]
+    "typeRoots": ["src/types"],
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2015"
+    ]
   },
   "include": ["src"],
   "exclude": [

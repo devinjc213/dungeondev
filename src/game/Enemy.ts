@@ -15,12 +15,12 @@ slimeImage.src = slimeIdleAnimation;
 export default class Enemy {
   private gameWidth: number;
   private gameHeight: number;
-  private readonly image: HTMLImageElement;
+  readonly image: HTMLImageElement;
   readonly width: number;
   readonly height: number;
   readonly x: number;
   readonly y: number;
-  isFacingRight: boolean;
+  readonly isFacingRight: boolean;
 
   constructor(gameWidth: number, gameHeight: number, monster: MonsterTypes, x: number, y: number) {
     this.gameWidth = gameWidth;
