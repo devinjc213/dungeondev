@@ -18,7 +18,7 @@ const tilesetImage = new Image();
 tilesetImage.src = tilesheet;
 
 function handleEnemies() {
-  enemies.forEach((enemy: any) => {
+  enemies.forEach((enemy: Enemy) => {
     enemy.draw(ctx, frameX);
   })
 }
