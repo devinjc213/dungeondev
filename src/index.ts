@@ -31,7 +31,6 @@ function paintUI() {
 
 function handleDrawMap(layer3: boolean) {
   if (layer3) {
-    ctx.save();
     Object.keys(map1.map[2]).forEach((key) => {
       //Determine x/y position of this placement from key ("3-4" -> x=3, y=4)
       const positionX = Number(key.split('-')[0]);
@@ -51,7 +50,6 @@ function handleDrawMap(layer3: boolean) {
         TILE_SIZE
       );
     });
-    ctx.restore();
   } else {
     map1.map.forEach((layer) => {
       Object.keys(layer).forEach((key) => {
