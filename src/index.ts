@@ -9,6 +9,7 @@ const ctx = canvas.getContext('2d');
 
 const CANVAS_WIDTH = canvas.width = 800;
 const CANVAS_HEIGHT = canvas.height = 640;
+const TILE_SIZE = 32;
 const staggerFrames = 5;
 let frameX = 0;
 let gameFrame = 0;
@@ -23,39 +24,66 @@ function handleEnemies() {
   })
 }
 
-function handleDrawMap() {
-  let size_of_crop = 32;
+function paintUI() {
+  ctx.font = '30px Comic Sans MS'
+  ctx.fillText(`${player.hp}/10`, CANVAS_WIDTH - 100, 50);
+}
 
-  map1.map.forEach((layer) => {
-    Object.keys(layer).forEach((key) => {
+function handleDrawMap(layer3: boolean) {
+  if (layer3) {
+    Object.keys(map1.map[2]).forEach((key) => {
       //Determine x/y position of this placement from key ("3-4" -> x=3, y=4)
       const positionX = Number(key.split('-')[0]);
       const positionY = Number(key.split('-')[1]);
       // @ts-ignore
-      const [tilesheetX, tilesheetY] = layer[key];
+      const [tilesheetX, tilesheetY] = map1.map[2][key];
 
       ctx.drawImage(
         tilesetImage,
-        tilesheetX * 32,
-        tilesheetY * 32,
-        size_of_crop,
-        size_of_crop,
-        positionX * 32,
-        positionY * 32,
-        size_of_crop,
-        size_of_crop
+        tilesheetX * TILE_SIZE,
+        tilesheetY * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE,
+        positionX * TILE_SIZE,
+        positionY * TILE_SIZE,
+        TILE_SIZE,
+        TILE_SIZE
       );
     });
-  });
+  } else {
+    map1.map.forEach((layer) => {
+      Object.keys(layer).forEach((key) => {
+        //Determine x/y position of this placement from key ("3-4" -> x=3, y=4)
+        const positionX = Number(key.split('-')[0]);
+        const positionY = Number(key.split('-')[1]);
+        // @ts-ignore
+        const [tilesheetX, tilesheetY] = layer[key];
+
+        ctx.drawImage(
+          tilesetImage,
+          tilesheetX * TILE_SIZE,
+          tilesheetY * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE,
+          positionX * TILE_SIZE,
+          positionY * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      });
+    });
+  }
 }
 
 function animate() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  //ctx.drawImage(background, 0, 0);
-  handleDrawMap();
+  handleDrawMap(false);
   handleEnemies();
   player.draw(ctx, frameX);
-  player.update(input, enemies);
+  player.update(input, enemies, ctx, frameX);
+  //draw layer3 over character
+  handleDrawMap(true);
+  paintUI();
 
   if (gameFrame % staggerFrames === 0) {
     if (frameX < 5) frameX++;
