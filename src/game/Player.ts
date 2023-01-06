@@ -55,6 +55,8 @@ export default class Player {
     context.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
     context.stroke();
     context.drawImage(this.playerImage, frameX * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT, this.x, this.y, 32, 32);
+
+    //sword animations
     if (this.isAttacking) {
       if (this.isFacingRight) {
         swordImage.src = swordSwingRight;
@@ -113,6 +115,7 @@ export default class Player {
       }
     })
 
+    //input
     this.x += this.xSpeed;
     this.y += this.ySpeed;
 
@@ -132,10 +135,9 @@ export default class Player {
       this.runDirection = 'north';
     } else this.ySpeed = 0;
 
-    if (input.keys.indexOf(' ') > -1) this.isAttacking = true;
-    else this.isAttacking = false;
+    this.isAttacking = input.keys.indexOf(' ') > -1;
 
-    //switch between animations
+    //animations
     if (this.xSpeed > 0) {
       this.playerImage.src = playerRunRight;
       this.isFacingRight = true;
@@ -144,7 +146,6 @@ export default class Player {
       this.isFacingRight = false;
     } else if (this.xSpeed === 0) this.playerImage.src = this.isFacingRight ? playerIdleRight : playerIdleLeft;
 
-    //ensure still animating run on y coord movements
     if (this.ySpeed !== 0 && this.isFacingRight) this.playerImage.src = playerRunRight;
     else if (this.ySpeed !== 0 && !this.isFacingRight) this.playerImage.src = playerRunLeft;
 

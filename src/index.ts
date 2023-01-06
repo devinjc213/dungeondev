@@ -79,7 +79,6 @@ function handleDrawMap(layer3: boolean) {
 
 function animate() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  //ctx.drawImage(background, 0, 0);
   handleDrawMap(false);
   handleEnemies();
   player.draw(ctx, frameX);
