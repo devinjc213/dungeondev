@@ -9,10 +9,12 @@ import swordSwingRight from '../assets/props_itens/sword_swing_right.png';
 import { map1 } from '../maps/map1.js';
 import Enemy from '../game/Enemy';
 import InputHandler from '../game/InputHandler';
+import { CircleCollision, CircleRectangleCollision, RectangleCollision } from '../utils';
 
 const SPRITE_WIDTH = 16;
 const SPRITE_HEIGHT = 16;
 const TILE_SIZE = 32;
+const MOVEMENT_SPEED = 3;
 const playerImage = new Image();
 playerImage.src = playerIdleRight;
 
@@ -26,13 +28,12 @@ export default class Player {
   readonly height: number;
   public x: number;
   public y: number;
-  public xSpeed: number;
-  public ySpeed: number;
   public hp: number;
   public isFacingRight: boolean;
-  public runDirection: string;
   readonly playerImage: HTMLImageElement;
   private isAttacking: boolean;
+  private xSpeed: number;
+  private ySpeed: number;
 
   constructor(gameWidth: number, gameHeight: number) {
     this.gameWidth = gameWidth;
@@ -45,14 +46,13 @@ export default class Player {
     this.ySpeed = 0;
     this.hp = 10;
     this.isFacingRight = true;
-    this.runDirection = 'east';
     this.playerImage = playerImage;
     this.isAttacking = false;
   }
 
   draw (context: CanvasRenderingContext2D, frameX: number) {
     context.beginPath();
-    context.arc(this.x + this.width/2, this.y + this.height/2, this.width/2, 0, Math.PI * 2);
+    context.arc(this.x + this.width/2 + 1, this.y + this.height/2 + 1, this.width/3, 0, Math.PI * 2);
     context.stroke();
     context.drawImage(this.playerImage, frameX * SPRITE_WIDTH, 0, SPRITE_WIDTH, SPRITE_HEIGHT, this.x, this.y, 32, 32);
 
@@ -77,63 +77,64 @@ export default class Player {
   }
 
   update(input: InputHandler, enemies: Enemy[], context: CanvasRenderingContext2D, frameX: number) {
-    //collision detection
-    for (const enemy of enemies) {
-      const dx = enemy.x - this.x;
-      const dy = enemy.y - this.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < enemy.width / 2 + this.width / 2) {
-        setInterval(() => {
-          this.hp = this.hp - 1;
-        }, 1000);
-      }
-    }
-
-    map1.collision.forEach((solid) => {
-      const coords = Object.keys(solid)[0];
-      const x = Number(coords.split('-')[0]) * TILE_SIZE;
-      const y = Number(coords.split('-')[1]) * TILE_SIZE;
-
-      const dx = x - this.x;
-      const dy = y - this.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < TILE_SIZE) {
-        switch (this.runDirection) {
-          case 'east':
-            this.x = x - this.width;
-            break;
-          case 'west':
-            this.x = x + this.width;
-            break;
-          case 'north':
-            this.y = y + this.width;
-            break;
-          case 'south':
-            this.y = y - this.width;
-            break;
-        }
-      }
-    })
-
-    //input
+    //input and collision
     this.x += this.xSpeed;
     this.y += this.ySpeed;
 
     if (input.keys.indexOf('ArrowRight') > -1) {
-      this.xSpeed = 3;
-      this.runDirection = 'east';
+      for (let i = 0; i < map1.collision.length; i++) {
+        const rectX = Number(Object.keys(map1.collision[i])[0].split('-')[0]) * TILE_SIZE;
+        const rectY = Number(Object.keys(map1.collision[i])[0].split('-')[1]) * TILE_SIZE;
+        const collided = RectangleCollision(
+          { x: this.x + MOVEMENT_SPEED, y: this.y, w: this.width, h: this.height },
+          { x: rectX, y: rectY, w: TILE_SIZE, h: TILE_SIZE});
+        if (collided) {
+          this.xSpeed = 0;
+          break;
+        } else this.xSpeed = 3;
+      }
     } else if (input.keys.indexOf('ArrowLeft') > -1) {
-      this.xSpeed = -3;
-      this.runDirection = 'west';
-    } else this.xSpeed = 0;
+      for (let i = 0; i < map1.collision.length; i++) {
+        const rectX = Number(Object.keys(map1.collision[i])[0].split('-')[0]) * TILE_SIZE;
+        const rectY = Number(Object.keys(map1.collision[i])[0].split('-')[1]) * TILE_SIZE;
+        const collided = RectangleCollision(
+          { x: this.x - MOVEMENT_SPEED, y: this.y, w: this.width, h: this.height },
+          { x: rectX, y: rectY, w: TILE_SIZE, h: TILE_SIZE});
+        if (collided) {
+          this.xSpeed = 0;
+          break;
+        } else this.xSpeed = -3;
+      }
+    }
+    else this.xSpeed = 0;
 
     if (input.keys.indexOf('ArrowDown') > -1) {
-      this.ySpeed = 3;
-      this.runDirection = 'south';
-    } else if (input.keys.indexOf('ArrowUp') > -1) {
-      this.ySpeed = -3;
-      this.runDirection = 'north';
-    } else this.ySpeed = 0;
+      for (let i = 0; i < map1.collision.length; i++) {
+        const rectX = Number(Object.keys(map1.collision[i])[0].split('-')[0]) * TILE_SIZE;
+        const rectY = Number(Object.keys(map1.collision[i])[0].split('-')[1]) * TILE_SIZE;
+        const collided = RectangleCollision(
+          { x: this.x, y: this.y + MOVEMENT_SPEED, w: this.width, h: this.height },
+          { x: rectX, y: rectY, w: TILE_SIZE, h: TILE_SIZE});
+        if (collided) {
+          this.ySpeed = 0;
+          break;
+        } else this.ySpeed = 3;
+      }
+    }
+    else if (input.keys.indexOf('ArrowUp') > -1) {
+      for (let i = 0; i < map1.collision.length; i++) {
+        const rectX = Number(Object.keys(map1.collision[i])[0].split('-')[0]) * TILE_SIZE;
+        const rectY = Number(Object.keys(map1.collision[i])[0].split('-')[1]) * TILE_SIZE;
+        const collided = RectangleCollision(
+          { x: this.x, y: this.y - MOVEMENT_SPEED, w: this.width, h: this.height },
+          { x: rectX, y: rectY, w: TILE_SIZE, h: TILE_SIZE});
+        if (collided) {
+          this.ySpeed = 0;
+          break;
+        } else this.ySpeed = -3;
+      }
+    }
+    else this.ySpeed = 0;
 
     this.isAttacking = input.keys.indexOf(' ') > -1;
 
@@ -141,11 +142,14 @@ export default class Player {
     if (this.xSpeed > 0) {
       this.playerImage.src = playerRunRight;
       this.isFacingRight = true;
-    } else if (this.xSpeed < 0) {
+    }
+    else if (this.xSpeed < 0) {
       this.playerImage.src = playerRunLeft;
       this.isFacingRight = false;
-    } else if (this.xSpeed === 0) this.playerImage.src = this.isFacingRight ? playerIdleRight : playerIdleLeft;
+    }
+    else if (this.xSpeed === 0) this.playerImage.src = this.isFacingRight ? playerIdleRight : playerIdleLeft;
 
+    //ensure still animating run on y coord movements
     if (this.ySpeed !== 0 && this.isFacingRight) this.playerImage.src = playerRunRight;
     else if (this.ySpeed !== 0 && !this.isFacingRight) this.playerImage.src = playerRunLeft;
 
